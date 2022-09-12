@@ -1,0 +1,164 @@
+package latihan;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.FileReader;
+import java.util.Scanner;
+import java.util.StringTokenizer;
+
+
+
+public class Latihan {
+
+    public static void main(String[] args) throws IOException{
+        
+        
+//      Menjadikan sebuah Objek
+        Scanner input = new Scanner(System.in);
+        tiket tiket = new tiket();
+        String namaFilm = null;
+        int film = 0;
+        
+        boolean lanjud = true;
+        
+        while(lanjud){
+        System.out.println("\n************[ TIKET PESANAN BIOSKOP ]************");
+       
+        String mulai = input.nextLine();
+        
+        if (!mulai.equalsIgnoreCase("start")){
+            System.out.println("Silahkan masukan kata kunci start");
+            continue;
+        }else if(mulai.equalsIgnoreCase("start")){
+//      Memasukan input dari user
+        System.out.print("Masukan nama      : ");
+        String nama = input.nextLine();
+        
+        System.out.print("Masukan nomor Tpl : ");
+        String tlp = input.nextLine();
+        
+        
+//      Memberikan nilai pada setter
+        tiket.setNama(nama);
+        tiket.setnoTlp(tlp);
+      
+//      Melihat data film
+        lihat();
+        
+//      Memilih film
+        try{
+        System.out.print("Masukan no pesanan film : ");
+        film = input.nextInt();
+        }catch(Exception e){
+            System.err.println("Maaf input tidak di kenali");
+        }
+        
+        
+        int kode = 0;
+        int harga = 0;
+        switch(film){
+            case 1:
+                namaFilm = "Stive jobs";
+                harga = 55000;
+                kode = 001;
+                break;
+            case 2:
+                namaFilm = "The social network ";
+                harga = 60000;
+                kode = 002;
+                break;
+            case 3:
+                namaFilm = "Takedown";
+                harga = 55000;
+                kode = 003;
+                break;
+            case 4:
+                namaFilm = "Hackers";
+                harga = 55000;
+                kode = 004;
+                break;
+            case 5:
+                namaFilm = "The matrix";
+                harga = 50000;
+                kode = 005;
+                break;
+            default:
+                System.err.println("Maaf input tidak di temukan");
+                break;
+            
+        }
+                
+        
+        
+        tiket.setHarga(harga);
+        tiket.setKode(kode);
+        
+            }else{
+             break;
+//           Disini hampa karena ketika saya menindis (y) di akhir maka tampilan ke dua akan ke sini     
+            }
+
+        
+        
+            if (film != 0){
+        System.out.println("\n*****************[ TIKET PESANAN ANDA ]*****************");
+        System.out.println("----------------------------------------------------------");  
+        System.out.println("Nama   : " + tiket.getNama());
+        System.out.println("telpon : " + tiket.getnoTlp());
+        System.out.println("----------------------------------------------------------");
+        System.out.println("Film   : " + namaFilm);
+        System.out.println("harga  : Rp." + tiket.getHarga());
+        System.out.println("kode   : " + tiket.getKode());
+        System.out.println("----------------------------------------------------------");
+        
+            }else{
+//          Hampa karena jika salah memasukan start maka larinya ke sini
+            }
+            
+        lanjud = ulang("Apakah anda ingin membeli lagi");
+        
+        }
+        
+    }
+    
+    private static boolean ulang(String masage){
+    Scanner input = new Scanner(System.in);
+    System.out.print("\n" + masage + "(y/n) : ");
+    String data = input.next();
+    
+    while(!data.equalsIgnoreCase("y") && !data.equalsIgnoreCase("n")){
+        System.err.println("Maaf input tidak di kenali");
+        System.out.print("\n" + masage + "(y/n) : ");
+        data = input.next();
+    }
+    
+    return data.equalsIgnoreCase("y");
+    
+    }
+    
+    private static void lihat() throws IOException{
+    
+    FileReader reader = new FileReader("adakah.txt");
+    BufferedReader file = new BufferedReader(reader);
+        
+    String data = file.readLine();
+    System.out.println("\n| No |       judul film       |   Jam tayang   |");
+    System.out.println("-----------------------------------------------");
+    int nomor = 0;
+    
+    while(data != null){
+    nomor++;    
+    StringTokenizer token = new StringTokenizer(data,",");
+    System.out.printf("|%3d " , nomor);
+    System.out.printf("|\t%-21s " , token.nextToken());
+    System.out.printf("|\t  %-8s " , token.nextToken());
+    System.out.print("\n");
+    data = file.readLine();
+    
+    }
+    
+    System.out.println("-----------------------------------------------");
+    
+    }
+    
+}
