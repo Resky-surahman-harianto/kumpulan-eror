@@ -1,0 +1,63 @@
+private static void hapusbook() throws IOException {
+
+//  File original
+        File file = new File("bersama.txt");
+        FileReader reder = new FileReader(file);
+        BufferedReader bufer = new BufferedReader(reder);
+
+//  File sementara    
+        File dumba = new File("dumba.txt");
+        FileWriter wiri = new FileWriter(dumba);
+        BufferedWriter buf = new BufferedWriter(wiri);
+
+        System.out.println("\nLish");
+        tambahkan();
+
+        Scanner input = new Scanner(System.in);
+        System.out.print("\nMasukan data yang ingin anda hapus : ");
+        int hapus = input.nextInt();
+
+        String data = bufer.readLine();
+        boolean tdkada = false;
+        int nomor = 0;
+        while (data != null) {
+            nomor++;
+
+            boolean hpdata = false;
+
+            StringTokenizer token = new StringTokenizer(data, ",");
+
+            if (hapus == nomor) {
+                System.out.println("\n Data yang anda ingin hapus adalah");
+                System.out.println("-------------------------------------");
+                System.out.println("Referensi   : " + token.nextToken());
+                System.out.println("tahun       : " + token.nextToken());
+                System.out.println("penilis     : " + token.nextToken());
+                System.out.println("penerbi     : " + token.nextToken());
+                System.out.println("judul       : " + token.nextToken());
+
+                hpdata = ulang("apakah anda yakin ingin menghapus data ????");
+                tdkada = true;
+
+            }
+
+            if (hpdata) {
+                System.out.println("data telah terhapus");
+            } else {
+                buf.write(data);
+                buf.newLine();
+            }
+
+            data = bufer.readLine();
+
+        }
+
+        if (!tdkada) {
+            System.err.println("Maaf data tidak di temukan ");
+        }
+
+        buf.flush();
+        file.delete();
+        dumba.renameTo(file);
+
+    }
