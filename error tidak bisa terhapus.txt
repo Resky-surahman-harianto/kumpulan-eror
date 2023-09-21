@@ -1,0 +1,343 @@
+package newproject;
+
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.time.Year;
+import java.util.Arrays;
+import java.util.Scanner;
+import java.util.StringTokenizer;
+
+public class NewProject {
+
+    public static void main(String[] args) throws IOException {
+
+        boolean lanjud = true;
+
+        while (lanjud) {
+
+            System.out.println("\n+-----------------------------+");
+            System.out.println("|         Perpustakaan        |");
+            System.out.println("+-----------------------------+");
+            System.out.println("| 1) Melihat data             |");
+            System.out.println("| 2) Mencari data             |");
+            System.out.println("| 3) Menambah data            |");
+            System.out.println("| 4) Menghapus data           |");
+            System.out.println("| 5) Mengupdate data          |");
+            System.out.println("+-----------------------------+");
+
+            Scanner input = new Scanner(System.in);
+            System.out.print("Pilih : ");
+            String data = input.nextLine();
+
+            switch (data) {
+
+                case "1":
+                    melihatData();
+                    break;
+
+                case "2":
+                    mencariData();
+                    break;
+
+                case "3":
+                    menambahkanData();
+                    break;
+
+                case "4":
+                    menghapusData();
+                    break;
+
+                case "5":
+                    break;
+
+                default:
+                    System.err.println("\nInput tidak di kenali");
+                    break;
+            }
+
+            lanjud = getYesOrNo("Apakah anda ingin melanjudkan");
+
+        }
+
+    }
+
+    private static void menghapusData() throws IOException {
+
+        File dbo = new File("perpustakaan.txt");
+        FileReader fileInput = new FileReader(dbo);
+        BufferedReader buferInput = new BufferedReader(fileInput);
+
+        File dbs = new File("dbs.txt");
+        FileWriter fileOuput = new FileWriter(dbs);
+        BufferedWriter buferOuput = new BufferedWriter(fileOuput);
+
+        melihatData();
+        Scanner input = new Scanner(System.in);
+        System.out.print("\nPilih : ");
+        int pilih = input.nextInt();
+
+        String data = buferInput.readLine();
+        int index = 0;
+        boolean temukan = false;
+        
+        while (data != null) {
+            index++;
+            StringTokenizer st = new StringTokenizer(data, ",");
+
+            boolean hapus = false;
+            if (pilih == index) {
+                System.out.println("\n Data yang akan anda hapus");
+                System.out.println("----------------------------");
+                System.out.println("Primary key   : " + st.nextToken());
+                System.out.println("Tahun terbit  : " + st.nextToken());
+                System.out.println("Nama penulis  : " + st.nextToken());
+                System.out.println("Penerbit buku : " + st.nextToken());
+                System.out.println("Judul buku    : " + st.nextToken());
+                System.out.println("----------------------------");
+                
+                hapus = getYesOrNo("Apakah anda yakin menghapus data ini");
+            }
+
+            if (hapus) {
+                System.out.println("\nData berhasil di hapus");
+            }else{
+                buferOuput.write(data);
+                buferOuput.newLine();
+            }
+
+            data = buferInput.readLine();
+        }
+
+        buferOuput.flush();
+        dbo.delete();
+        dbs.renameTo(dbo);
+        
+    }
+
+    private static void menambahkanData() throws IOException {
+
+        FileWriter writeOutput = new FileWriter("perpustakaan.txt", true);
+        BufferedWriter buferOutput = new BufferedWriter(writeOutput);
+
+        Scanner input = new Scanner(System.in);
+        String tahun, nama, penerbit, judul;
+
+        System.out.print("\nMasukan tahun terbit   : ");
+        tahun = cekTahun();
+        System.out.print("Masukan nama penulis   : ");
+        nama = input.nextLine();
+        System.out.print("Masukan penerbit buku  : ");
+        penerbit = input.nextLine();
+        System.out.print("Masukan judul buku     : ");
+        judul = input.nextLine();
+
+        String[] kumpul = {tahun + "," + nama + "," + penerbit + "," + judul};
+        boolean cek = periksa(kumpul, false);
+
+        if (!cek) {
+
+            long entry = cekEntry(nama, tahun) + 1;
+            String penulisTanpaSpasi = nama.replace(" ", "");
+            String primaryKey = penulisTanpaSpasi + "_" + tahun + "_" + entry;
+
+            System.out.println("\n  Data yang anda masukan adalah");
+            System.out.println("---------------------------------");
+            System.out.println("Prymari key   : " + primaryKey);
+            System.out.println("Tahun terbit  : " + tahun);
+            System.out.println("Nama penerbit : " + nama);
+            System.out.println("Penerbit buku : " + penerbit);
+            System.out.println("Judul buku    : " + judul);
+            System.out.println("---------------------------------");
+
+            boolean tulis = getYesOrNo("Apakah anda yakin akan menambahkan data tersebut");
+
+            if (tulis) {
+                buferOutput.write(primaryKey + "," + tahun + "," + nama + "," + penerbit + "," + judul);
+                buferOutput.newLine();
+                buferOutput.flush();
+            }
+
+        } else {
+            System.out.println("\nMaaf data yang anda masukan sudah ada di database"
+                    + "\nSebagai berikut : ");
+            periksa(kumpul, true);
+        }
+
+    }
+
+    private static long cekEntry(String nama, String tahun) throws IOException {
+
+        FileReader fileInput = new FileReader("perpustakaan.txt");
+        BufferedReader buferInput = new BufferedReader(fileInput);
+
+        String data = buferInput.readLine();
+
+        Scanner sc;
+        String prymarikey;
+        long entry = 0;
+
+        while (data != null) {
+            sc = new Scanner(data);
+            sc.useDelimiter(",");
+            prymarikey = sc.next();
+            sc = new Scanner(prymarikey);
+            sc.useDelimiter("_");
+
+            nama = nama.replace(" ", "");
+
+            if (sc.next().equalsIgnoreCase(nama) && sc.next().equalsIgnoreCase(tahun)) {
+                entry = sc.nextInt();
+            }
+
+            data = buferInput.readLine();
+        }
+
+        return entry;
+    }
+
+    private static String cekTahun() {
+
+        Scanner input = new Scanner(System.in);
+        String data = input.nextLine();
+
+        boolean jalan = true;
+
+        while (jalan) {
+
+            try {
+                Year.parse(data);
+                jalan = false;
+            } catch (Exception e) {
+                System.err.println("Input tidak di kenali");
+                System.out.print("\nMasukan tahun terbit   : ");
+                data = input.nextLine();
+            }
+
+        }
+
+        return data;
+
+    }
+
+    private static void mencariData() throws IOException {
+
+        Scanner input = new Scanner(System.in);
+        System.out.print("\nCari data : ");
+        String data = input.nextLine();
+
+        String[] cari = data.split("\\s+");
+        System.out.println(Arrays.toString(cari));
+        periksa(cari, true);
+
+    }
+
+    private static boolean periksa(String[] keyword, boolean isLihat) throws IOException {
+
+        FileReader rederinput = new FileReader("perpustakaan.txt");
+        BufferedReader buferInput = new BufferedReader(rederinput);
+
+        String data = buferInput.readLine();
+
+        boolean isExis = false;
+        int no = 0;
+
+        if (isLihat) {
+            System.out.println("\n+------------------------------------------------------------------------------------------------------------------------------------+");
+            System.out.println("| No |    Tahun   |                 Nama                 |             Penerbit            |                  Judul                  |");
+            System.out.println("+------------------------------------------------------------------------------------------------------------------------------------+");
+        }
+
+        while (data != null) {
+
+            isExis = true;
+            for (String a : keyword) {
+                isExis = isExis && data.toLowerCase().contains(a.toLowerCase());
+            }
+
+            if (isExis) {
+
+                if (isLihat) {
+                    no++;
+                    StringTokenizer st = new StringTokenizer(data, ",");
+                    st.nextToken();
+                    System.out.print("| " + no + " ");
+                    System.out.printf("|\t%-10s", st.nextToken());
+                    System.out.printf("|\t%-33s", st.nextToken());
+                    System.out.printf("|\t%-27s", st.nextToken());
+                    System.out.printf("|\t%s", st.nextToken());
+                    System.out.print("\n");
+                } else {
+                    break;
+                }
+
+            }
+
+            data = buferInput.readLine();
+        }
+
+        if (isLihat) {
+            System.out.println("+------------------------------------------------------------------------------------------------------------------------------------+");
+        }
+
+        return isExis;
+
+    }
+
+    private static void melihatData() throws IOException {
+
+        FileReader rederInput;
+        BufferedReader buferInput = null;
+
+        try {
+            rederInput = new FileReader("perpustakaan.txt");
+            buferInput = new BufferedReader(rederInput);
+        } catch (Exception e) {
+            System.err.println("Database tidak ditemukan");
+        }
+
+        String data = buferInput.readLine();
+
+        System.out.println("\n+------------------------------------------------------------------------------------------------------------------------------------+");
+        System.out.println("| No |    Tahun   |                 Nama                 |             Penerbit            |                  Judul                  |");
+        System.out.println("+------------------------------------------------------------------------------------------------------------------------------------+");
+
+        int no = 0;
+        while (data != null) {
+            no++;
+            StringTokenizer st = new StringTokenizer(data, ",");
+            st.nextToken();
+            System.out.print("| " + no + " ");
+            System.out.printf("|\t%-10s", st.nextToken());
+            System.out.printf("|\t%-33s", st.nextToken());
+            System.out.printf("|\t%-27s", st.nextToken());
+            System.out.printf("|\t%s", st.nextToken());
+            System.out.print("\n");
+
+            data = buferInput.readLine();
+        }
+
+        System.out.println("+------------------------------------------------------------------------------------------------------------------------------------+");
+
+    }
+
+    private static boolean getYesOrNo(String message) {
+
+        Scanner input = new Scanner(System.in);
+        System.out.print("\n" + message + "(Y/N)");
+        String data = input.nextLine();
+
+        while (!data.equalsIgnoreCase("y") && !data.equalsIgnoreCase("n")) {
+            System.err.println("Input tidak di kenali");
+            System.out.print("\n" + message + "(Y/N)");
+            data = input.nextLine();
+        }
+
+        return data.equalsIgnoreCase("y");
+
+    }
+
+}
